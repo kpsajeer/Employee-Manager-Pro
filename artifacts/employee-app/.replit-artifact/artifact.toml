@@ -13,6 +13,9 @@ localPort = 22532
 [services.development]
 run = "bash /home/runner/workspace/php-employee-app/start.sh"
 
+[services.production]
+run = "bash /home/runner/workspace/php-employee-app/start.sh"
+
 [services.env]
 PORT = "22532"
 BASE_PATH = "/"
