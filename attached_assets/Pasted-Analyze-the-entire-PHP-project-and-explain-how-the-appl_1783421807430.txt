@@ -1,0 +1,124 @@
+Analyze the entire PHP project and explain how the application works.
+
+Do not modify any code. Your task is only to understand and document the application.
+
+Please explain the following:
+
+1. Overall Architecture
+   - Which architectural pattern is used (MVC, Layered, etc.)
+   - Explain why you think this architecture is being used.
+   - Draw an ASCII architecture diagram.
+
+2. Request Lifecycle
+   - What happens when a user opens the application?
+   - Which file is the entry point?
+   - How are requests routed?
+   - Which controllers are executed?
+   - How are views rendered?
+
+3. Folder Structure
+   Explain the purpose of every major folder and important files.
+
+4. Database
+   - Which database is being used?
+   - How is the database connection established?
+   - Where are the credentials stored?
+   - How is PDO or another database library configured?
+   - List all database tables and explain their purpose.
+   - Create an Entity Relationship (ER) diagram if possible.
+
+5. Data Flow
+   Explain what happens when:
+   - Creating a record
+   - Viewing a record
+   - Updating a record
+   - Deleting a record
+
+   Include sequence diagrams using ASCII.
+
+6. Controllers
+   Explain the responsibility of each controller.
+
+7. Models
+   Explain what each model represents.
+   List important methods.
+
+8. Business Logic
+   Where is the business logic implemented?
+   Which classes are responsible for validations and calculations?
+
+9. Database Layer
+   Explain how SQL queries are executed.
+   Which classes interact directly with the database?
+
+10. Authentication
+   If authentication exists:
+   - Login flow
+   - Session handling
+   - Authorization
+
+11. Security
+   Explain how the application protects against:
+   - SQL Injection
+   - XSS
+   - CSRF
+   - Password storage
+   - Input validation
+
+12. External Libraries
+   List all Composer packages and explain why they are used.
+
+13. API
+   If REST APIs exist:
+   - List all endpoints
+   - Explain request and response formats.
+
+14. Configuration
+   Explain:
+   - .env variables
+   - Config files
+   - Database configuration
+   - Application configuration
+
+15. Logging and Error Handling
+   Explain where logs are stored and how errors are handled.
+
+16. File Uploads
+   Explain where uploaded files are stored and how they are processed.
+
+17. Caching
+   If caching is used, explain:
+   - Which cache system
+   - Cache lifecycle
+   - Cache invalidation
+
+18. Overall Application Flow
+   Create a complete end-to-end flow diagram from:
+   Browser
+       ↓
+   Entry Point
+       ↓
+   Router
+       ↓
+   Controller
+       ↓
+   Service
+       ↓
+   Repository
+       ↓
+   Database
+       ↓
+   Response
+       ↓
+   Browser
+
+19. Class Relationships
+   Explain how the major classes interact with each other.
+
+20. Summary
+   - Strengths of the architecture
+   - Weaknesses
+   - Possible improvements
+   - Scalability considerations
+
+Generate a comprehensive technical documentation (README.md) suitable for a new developer joining the project.
