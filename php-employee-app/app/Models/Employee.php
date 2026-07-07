@@ -10,6 +10,11 @@ use PDO;
  * Employee model – all database interactions for the employees table.
  *
  * Uses PDO prepared statements throughout to prevent SQL injection.
+ * Targets PostgreSQL; key differences from MySQL:
+ *   - ILIKE  instead of LIKE  (case-insensitive search)
+ *   - SQLSTATE 23505          instead of 23000 (unique-constraint violation)
+ *   - INSERT … RETURNING id   instead of lastInsertId()
+ *   - COUNT(*) FILTER (…)     instead of SUM(bool_expr)
  */
 class Employee
 {
@@ -53,7 +58,8 @@ class Employee
         $binds  = [];
 
         if ($search !== '') {
-            $where[] = "(first_name LIKE :search OR last_name LIKE :search OR email LIKE :search)";
+            // ILIKE = case-insensitive LIKE in PostgreSQL
+            $where[] = "(first_name ILIKE :search OR last_name ILIKE :search OR email ILIKE :search)";
             $binds[':search'] = '%' . $search . '%';
         }
 
@@ -106,7 +112,11 @@ class Employee
     // -------------------------------------------------------------------------
 
     /**
-     * Insert a new employee record.
+     * Insert a new employee record. Returns the new employee's id.
+     *
+     * RETURNING id is used instead of lastInsertId() because PostgreSQL
+     * sequences require passing the sequence name to lastInsertId(), whereas
+     * RETURNING is simpler and works regardless of the sequence name.
      *
      * @param  array<string,mixed> $data  Validated employee data
      * @throws \RuntimeException if a duplicate email race condition is detected
@@ -118,21 +128,22 @@ class Employee
                      salary, date_joined, status)
                 VALUES
                     (:first_name, :last_name, :email, :phone, :department, :position,
-                     :salary, :date_joined, :status)";
+                     :salary, :date_joined, :status)
+                RETURNING id";
 
         $stmt = $this->db->prepare($sql);
 
         try {
             $stmt->execute($this->buildBinds($data));
         } catch (\PDOException $e) {
-            // MySQL error 1062 = Duplicate entry (unique constraint violation)
-            if ($e->getCode() === '23000') {
+            // PostgreSQL SQLSTATE 23505 = unique_violation (duplicate key)
+            if ($e->getCode() === '23505') {
                 throw new \RuntimeException('duplicate_email');
             }
             throw $e;
         }
 
-        return (int) $this->db->lastInsertId();
+        return (int) $stmt->fetchColumn();
     }
 
     /**
@@ -164,7 +175,8 @@ class Employee
         try {
             $stmt->execute($binds);
         } catch (\PDOException $e) {
-            if ($e->getCode() === '23000') {
+            // PostgreSQL SQLSTATE 23505 = unique_violation (duplicate key)
+            if ($e->getCode() === '23505') {
                 throw new \RuntimeException('duplicate_email');
             }
             throw $e;
@@ -192,10 +204,10 @@ class Employee
     {
         $stmt = $this->db->query(
             "SELECT
-                COUNT(*) AS total,
-                SUM(status = 'active')   AS active,
-                SUM(status = 'inactive') AS inactive,
-                COUNT(DISTINCT department) AS departments
+                COUNT(*)                              AS total,
+                COUNT(*) FILTER (WHERE status = 'active')   AS active,
+                COUNT(*) FILTER (WHERE status = 'inactive') AS inactive,
+                COUNT(DISTINCT department)            AS departments
              FROM employees"
         );
         $row = $stmt->fetch();
@@ -227,7 +239,7 @@ class Employee
         $binds = [];
 
         if ($search !== '') {
-            $where[] = "(first_name LIKE :search OR last_name LIKE :search OR email LIKE :search)";
+            $where[] = "(first_name ILIKE :search OR last_name ILIKE :search OR email ILIKE :search)";
             $binds[':search'] = '%' . $search . '%';
         }
         if ($department !== '') {

@@ -9,7 +9,7 @@ use PDOException;
 use RuntimeException;
 
 /**
- * Database – PDO singleton wrapper.
+ * Database – PDO singleton wrapper for PostgreSQL.
  *
  * Provides a single shared connection for the entire request lifecycle.
  * Call Database::getInstance() anywhere you need the PDO object.
@@ -23,29 +23,29 @@ final class Database
     {
         $config = require ROOT_PATH . '/config/database.php';
 
-        // Prefer Unix socket (faster, no network; used on Replit).
-        // Fall back to TCP host/port for local dev or hosted MySQL.
-        if (!empty($config['socket'])) {
-            $dsn = sprintf(
-                'mysql:unix_socket=%s;dbname=%s;charset=%s',
-                $config['socket'],
-                $config['dbname'],
-                $config['charset']
-            );
-        } else {
-            $dsn = sprintf(
-                'mysql:host=%s;port=%d;dbname=%s;charset=%s',
-                $config['host'],
-                $config['port'],
-                $config['dbname'],
-                $config['charset']
-            );
+        // Build DSN from parsed URL components, preserving any libpq options
+        // (e.g. sslmode=require) that were present in the original DATABASE_URL.
+        $dsn = sprintf(
+            'pgsql:host=%s;port=%d;dbname=%s',
+            $config['host'],
+            (int) $config['port'],
+            $config['dbname']
+        );
+
+        // Append libpq key=value options from the URL query string (sslmode, etc.)
+        foreach ($config['extra_options'] as $key => $value) {
+            $dsn .= sprintf(';%s=%s', $key, $value);
         }
 
         try {
-            $this->pdo = new PDO($dsn, $config['username'], $config['password'], $config['options']);
+            $this->pdo = new PDO(
+                $dsn,
+                $config['username'],
+                $config['password'],
+                $config['pdo_options']
+            );
         } catch (PDOException $e) {
-            // Avoid leaking credentials in error messages
+            // Avoid leaking credentials in error messages.
             throw new RuntimeException('Database connection failed: ' . $e->getMessage());
         }
     }

@@ -1,0 +1,1 @@
+- [PHP-PostgreSQL migration](php-postgres-migration.md) — employee-manager app uses Replit built-in PG; DSN built from parsed DATABASE_URL with rawurldecode + sslmode forwarding.
