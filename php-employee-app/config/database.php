@@ -3,12 +3,22 @@
 declare(strict_types=1);
 
 /**
- * Database configuration
- * Update these values to match your local MySQL installation.
+ * Database configuration.
+ *
+ * Replit environment: MySQL is started locally via start.sh.
+ * The socket file is used for the connection (no network overhead).
+ *
+ * For local development outside Replit, switch to TCP:
+ *   comment out 'socket' and set 'host'/'port' instead.
  */
 return [
-    'host'     => 'localhost',
+    // Unix socket path used when running on Replit (set by start.sh)
+    'socket'   => '/tmp/mysql.sock',
+
+    // TCP fallback – used when 'socket' is empty/absent
+    'host'     => '127.0.0.1',
     'port'     => 3306,
+
     'dbname'   => 'employee_manager',
     'username' => 'root',
     'password' => '',

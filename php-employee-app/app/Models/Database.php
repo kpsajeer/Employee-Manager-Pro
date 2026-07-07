@@ -23,13 +23,24 @@ final class Database
     {
         $config = require ROOT_PATH . '/config/database.php';
 
-        $dsn = sprintf(
-            'mysql:host=%s;port=%d;dbname=%s;charset=%s',
-            $config['host'],
-            $config['port'],
-            $config['dbname'],
-            $config['charset']
-        );
+        // Prefer Unix socket (faster, no network; used on Replit).
+        // Fall back to TCP host/port for local dev or hosted MySQL.
+        if (!empty($config['socket'])) {
+            $dsn = sprintf(
+                'mysql:unix_socket=%s;dbname=%s;charset=%s',
+                $config['socket'],
+                $config['dbname'],
+                $config['charset']
+            );
+        } else {
+            $dsn = sprintf(
+                'mysql:host=%s;port=%d;dbname=%s;charset=%s',
+                $config['host'],
+                $config['port'],
+                $config['dbname'],
+                $config['charset']
+            );
+        }
 
         try {
             $this->pdo = new PDO($dsn, $config['username'], $config['password'], $config['options']);

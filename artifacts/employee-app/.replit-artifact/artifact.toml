@@ -1,0 +1,18 @@
+kind = "web"
+previewPath = "/"
+title = "Employee Manager"
+version = "1.0.0"
+id = "artifacts/employee-app"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22532
+
+[services.development]
+run = "bash /home/runner/workspace/php-employee-app/start.sh"
+
+[services.env]
+PORT = "22532"
+BASE_PATH = "/"
